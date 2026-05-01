@@ -1,6 +1,6 @@
 package com.franciscoreina.reviewinsight.model.domain
 
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 data class Review(
     val author: String,
@@ -8,6 +8,6 @@ data class Review(
     val title: String,
     val content: String,
     val voteCount: Int,
-    val date: LocalDateTime,
+    val date: OffsetDateTime,
     val sentiment: Sentiment
 )

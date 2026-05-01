@@ -4,6 +4,7 @@ import com.franciscoreina.reviewinsight.client.apple.dto.AppleReviewDTO
 import com.franciscoreina.reviewinsight.client.apple.dto.AuthorDTO
 import com.franciscoreina.reviewinsight.client.apple.dto.LabelDTO
 import org.assertj.core.api.Assertions.assertThat
+import java.time.OffsetDateTime
 import kotlin.test.Test
 
 class ReviewMapperTest {
@@ -35,10 +36,23 @@ class ReviewMapperTest {
         assertThat(review.voteCount).isEqualTo(10)
     }
 
+    @Test
+    fun `should parse updated date string to offsetdatetime`() {
+        // GIVEN
+        val dto = createAppleReviewDTO(updated = "2026-05-01T10:50:00-07:00")
+
+        // WHEN
+        val review = dto.toDomain()
+
+        // THEN
+        assertThat(review.date).isEqualTo(OffsetDateTime.parse("2026-05-01T10:50:00-07:00"))
+    }
+
     // --- HELPERS ---
 
     private fun createAppleReviewDTO(
         author: String = "author",
+        updated: String = "2026-04-28T11:52:49-07:00",
         rating: String = "0",
         title: String = "title",
         content: String = "content",
@@ -46,7 +60,7 @@ class ReviewMapperTest {
     ): AppleReviewDTO {
         return AppleReviewDTO(
             author = AuthorDTO(LabelDTO(author)),
-            updated = LabelDTO("2026-04-28T11:52:49-07:00"),
+            updated = LabelDTO(updated),
             rating = LabelDTO(rating),
             title = LabelDTO(title),
             content = LabelDTO(content),

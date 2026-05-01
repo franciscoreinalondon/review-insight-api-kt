@@ -3,7 +3,7 @@ package com.franciscoreina.reviewinsight.client.apple.mapper
 import com.franciscoreina.reviewinsight.client.apple.dto.AppleReviewDTO
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 
 fun AppleReviewDTO.toDomain(): Review {
     return Review(
@@ -12,7 +12,7 @@ fun AppleReviewDTO.toDomain(): Review {
         title = this.title.label,
         content = this.content.label,
         voteCount = this.voteCount.label.toInt(),
-        date = LocalDateTime.now(),
+        date = OffsetDateTime.parse(this.updated.label),
         sentiment = Sentiment.NEGATIVE
     )
 }
