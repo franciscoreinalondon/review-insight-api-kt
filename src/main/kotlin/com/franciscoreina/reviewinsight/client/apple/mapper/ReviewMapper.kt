@@ -8,10 +8,10 @@ import java.time.LocalDateTime
 fun AppleReviewDTO.toDomain(): Review {
     return Review(
         author = this.author.name.label,
-        rating = -1,
+        rating = this.rating.label.toInt(),
         title = this.title.label,
         content = this.content.label,
-        voteCount = -1,
+        voteCount = this.voteCount.label.toInt(),
         date = LocalDateTime.now(),
         sentiment = Sentiment.NEGATIVE
     )
