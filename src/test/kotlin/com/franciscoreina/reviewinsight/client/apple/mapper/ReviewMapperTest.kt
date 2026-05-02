@@ -3,7 +3,10 @@ package com.franciscoreina.reviewinsight.client.apple.mapper
 import com.franciscoreina.reviewinsight.client.apple.dto.AppleReviewDTO
 import com.franciscoreina.reviewinsight.client.apple.dto.AuthorDTO
 import com.franciscoreina.reviewinsight.client.apple.dto.LabelDTO
+import com.franciscoreina.reviewinsight.model.domain.Sentiment
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.OffsetDateTime
 import kotlin.test.Test
 
@@ -46,6 +49,26 @@ class ReviewMapperTest {
 
         // THEN
         assertThat(review.date).isEqualTo(OffsetDateTime.parse("2026-05-01T10:50:00-07:00"))
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "5, POSITIVE",
+        "4, POSITIVE",
+        "3, NEUTRAL",
+        "2, NEGATIVE",
+        "1, NEGATIVE",
+        "0, NEGATIVE"
+    )
+    fun `should assign sentiment from numeric rating`(rating: String, expectedSentiment: Sentiment) {
+        // GIVEN
+        val dto = createAppleReviewDTO(rating = rating)
+
+        // WHEN
+        val review = dto.toDomain()
+
+        // THEN
+        assertThat(review.sentiment).isEqualTo(expectedSentiment)
     }
 
     // --- HELPERS ---
