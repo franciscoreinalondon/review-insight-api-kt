@@ -83,6 +83,20 @@ class ReviewMapperTest {
     inner class EdgeCases {
 
         @Test
+        fun `should trim whitespaces from strings`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(author = " Francisco ", title = " Amazing App ", content = " It's so great ")
+
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.author).isEqualTo("Francisco")
+            assertThat(review.title).isEqualTo("Amazing App")
+            assertThat(review.content).isEqualTo("It's so great")
+        }
+
+        @Test
         fun `should handle invalid numeric string`() {
             // GIVEN
             val dto = createAppleReviewDTO(rating = "N/A", voteCount = "")
