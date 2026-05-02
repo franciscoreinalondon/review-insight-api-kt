@@ -10,6 +10,8 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.OffsetDateTime
@@ -20,21 +22,35 @@ class InsightServiceImplTest {
     private val reviewAnalyzerMock = mockk<ReviewAnalyzer>()
     private val insightService = InsightServiceImpl(reviewAnalyzerMock)
 
-    @Test
-    fun `should generate insight from reviews`() {
-        // GIVEN
-        val reviews = listOf(createReview())
-        val problems = listOf(createProblem())
-        val insight = createInsight("Success", problems)
+    @Nested
+    @DisplayName("Successful generation")
+    inner class HappyPath {
 
-        every { reviewAnalyzerMock.analyze(reviews) } returns insight
+        @Test
+        fun `should generate insight from reviews`() {
+            // GIVEN
+            val reviews = listOf(createReview())
+            val problems = listOf(createProblem())
+            val insight = createInsight("Success", problems)
 
-        // WHEN
-        val result = insightService.generateInsight(reviews)
+            every { reviewAnalyzerMock.analyze(reviews) } returns insight
 
-        // THEN
-        assertThat(result).isEqualTo(insight)
-        verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
+            // WHEN
+            val result = insightService.generateInsight(reviews)
+
+            // THEN
+            assertThat(result).isEqualTo(insight)
+            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
+        }
+
+    }
+
+    @Nested
+    @DisplayName("Edge Cases and Error Handling")
+    inner class EdgeCases {
+
+
+
     }
 
     // --- HELPERS ---
