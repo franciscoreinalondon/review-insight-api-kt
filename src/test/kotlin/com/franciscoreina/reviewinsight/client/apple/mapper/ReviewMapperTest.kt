@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import kotlin.test.Test
 
 class ReviewMapperTest {
@@ -55,6 +56,7 @@ class ReviewMapperTest {
 
             // THEN
             assertThat(review.date).isEqualTo(OffsetDateTime.parse("2026-05-01T10:50:00-07:00"))
+            assertThat(review.date.offset).isEqualTo(ZoneOffset.ofHours(-7))
         }
 
         @ParameterizedTest
