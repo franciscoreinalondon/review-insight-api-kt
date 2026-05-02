@@ -97,6 +97,18 @@ class ReviewMapperTest {
         }
 
         @Test
+        fun `should handle emojis and special characters`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(title = "Amazing App!! ⭐️⭐️⭐️")
+
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.title).isEqualTo("Amazing App!! ⭐️⭐️⭐️")
+        }
+
+        @Test
         fun `should handle invalid numeric string`() {
             // GIVEN
             val dto = createAppleReviewDTO(rating = "N/A", voteCount = "")
