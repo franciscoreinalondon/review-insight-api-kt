@@ -59,12 +59,14 @@ class ReviewMapperTest {
 
         @ParameterizedTest
         @CsvSource(
+            "6, POSITIVE", // out-of-range control
             "5, POSITIVE",
             "4, POSITIVE",
             "3, NEUTRAL",
             "2, NEGATIVE",
             "1, NEGATIVE",
-            "0, NEGATIVE"
+            "0, NEGATIVE",
+            "-1, NEGATIVE" // out-of-range control
         )
         fun `should assign sentiment from numeric rating`(rating: String, expectedSentiment: Sentiment) {
             // GIVEN

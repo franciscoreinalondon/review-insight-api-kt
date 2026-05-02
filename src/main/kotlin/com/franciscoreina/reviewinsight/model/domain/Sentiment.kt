@@ -7,9 +7,9 @@ enum class Sentiment {
     UNKNOWN;
 
     companion object {
-        fun fromRating(rating: Int): Sentiment {
+        fun fromRating(rating: Int?): Sentiment {
             return when {
-                rating == -1 -> UNKNOWN
+                rating == null -> UNKNOWN
                 rating >= 4 -> POSITIVE
                 rating <= 2 -> NEGATIVE
                 else -> NEUTRAL

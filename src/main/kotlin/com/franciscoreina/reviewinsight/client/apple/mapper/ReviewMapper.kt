@@ -13,6 +13,6 @@ fun AppleReviewDTO.toDomain(): Review {
         content = this.content.label.trim(),
         voteCount = this.voteCount.label.toIntOrNull() ?: 0,
         date = OffsetDateTime.parse(this.updated.label),
-        sentiment = Sentiment.fromRating(this.rating.label.toIntOrNull() ?: -1)
+        sentiment = Sentiment.fromRating(this.rating.label.toIntOrNull())
     )
 }
