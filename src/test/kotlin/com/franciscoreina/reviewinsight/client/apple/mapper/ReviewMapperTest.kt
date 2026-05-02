@@ -71,6 +71,20 @@ class ReviewMapperTest {
         assertThat(review.sentiment).isEqualTo(expectedSentiment)
     }
 
+    @Test
+    fun `should handle invalid numeric string`() {
+        // GIVEN
+        val dto = createAppleReviewDTO(rating = "N/A", voteCount = "")
+
+        // WHEN
+        val review = dto.toDomain()
+
+        // THEN
+        assertThat(review.rating).isEqualTo(0)
+        assertThat(review.voteCount).isEqualTo(0)
+        assertThat(review.sentiment).isEqualTo(Sentiment.UNKNOWN)
+    }
+
     // --- HELPERS ---
 
     private fun createAppleReviewDTO(
