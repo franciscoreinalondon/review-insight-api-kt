@@ -5,6 +5,8 @@ import com.franciscoreina.reviewinsight.client.apple.dto.AuthorDTO
 import com.franciscoreina.reviewinsight.client.apple.dto.LabelDTO
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import java.time.OffsetDateTime
@@ -12,77 +14,87 @@ import kotlin.test.Test
 
 class ReviewMapperTest {
 
-    @Test
-    fun `should map basic strings from apple dto to domain`() {
-        // GIVEN
-        val dto = createAppleReviewDTO(author = "Francisco", title = "Amazing App", content = "It's so great")
+    @Nested
+    @DisplayName("Successful Mapping")
+    inner class HappyPath {
 
-        // WHEN
-        val review = dto.toDomain()
+        @Test
+        fun `should map basic strings from apple dto to domain`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(author = "Francisco", title = "Amazing App", content = "It's so great")
 
-        // THEN
-        assertThat(review.author).isEqualTo("Francisco")
-        assertThat(review.title).isEqualTo("Amazing App")
-        assertThat(review.content).isEqualTo("It's so great")
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.author).isEqualTo("Francisco")
+            assertThat(review.title).isEqualTo("Amazing App")
+            assertThat(review.content).isEqualTo("It's so great")
+        }
+
+        @Test
+        fun `should map strings to integers for rating and vote`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(rating = "5", voteCount = "10")
+
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.rating).isEqualTo(5)
+            assertThat(review.voteCount).isEqualTo(10)
+        }
+
+        @Test
+        fun `should parse updated date string to offsetdatetime`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(updated = "2026-05-01T10:50:00-07:00")
+
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.date).isEqualTo(OffsetDateTime.parse("2026-05-01T10:50:00-07:00"))
+        }
+
+        @ParameterizedTest
+        @CsvSource(
+            "5, POSITIVE",
+            "4, POSITIVE",
+            "3, NEUTRAL",
+            "2, NEGATIVE",
+            "1, NEGATIVE",
+            "0, NEGATIVE"
+        )
+        fun `should assign sentiment from numeric rating`(rating: String, expectedSentiment: Sentiment) {
+            // GIVEN
+            val dto = createAppleReviewDTO(rating = rating)
+
+            // WHEN
+            val review = dto.toDomain()
+
+            // THEN
+            assertThat(review.sentiment).isEqualTo(expectedSentiment)
+        }
     }
 
-    @Test
-    fun `should map strings to integers for rating and vote`() {
-        // GIVEN
-        val dto = createAppleReviewDTO(rating = "5", voteCount = "10")
+    @Nested
+    @DisplayName("Edge Cases and Error Handling")
+    inner class EdgeCases {
 
-        // WHEN
-        val review = dto.toDomain()
+        @Test
+        fun `should handle invalid numeric string`() {
+            // GIVEN
+            val dto = createAppleReviewDTO(rating = "N/A", voteCount = "")
 
-        // THEN
-        assertThat(review.rating).isEqualTo(5)
-        assertThat(review.voteCount).isEqualTo(10)
-    }
+            // WHEN
+            val review = dto.toDomain()
 
-    @Test
-    fun `should parse updated date string to offsetdatetime`() {
-        // GIVEN
-        val dto = createAppleReviewDTO(updated = "2026-05-01T10:50:00-07:00")
-
-        // WHEN
-        val review = dto.toDomain()
-
-        // THEN
-        assertThat(review.date).isEqualTo(OffsetDateTime.parse("2026-05-01T10:50:00-07:00"))
-    }
-
-    @ParameterizedTest
-    @CsvSource(
-        "5, POSITIVE",
-        "4, POSITIVE",
-        "3, NEUTRAL",
-        "2, NEGATIVE",
-        "1, NEGATIVE",
-        "0, NEGATIVE"
-    )
-    fun `should assign sentiment from numeric rating`(rating: String, expectedSentiment: Sentiment) {
-        // GIVEN
-        val dto = createAppleReviewDTO(rating = rating)
-
-        // WHEN
-        val review = dto.toDomain()
-
-        // THEN
-        assertThat(review.sentiment).isEqualTo(expectedSentiment)
-    }
-
-    @Test
-    fun `should handle invalid numeric string`() {
-        // GIVEN
-        val dto = createAppleReviewDTO(rating = "N/A", voteCount = "")
-
-        // WHEN
-        val review = dto.toDomain()
-
-        // THEN
-        assertThat(review.rating).isEqualTo(0)
-        assertThat(review.voteCount).isEqualTo(0)
-        assertThat(review.sentiment).isEqualTo(Sentiment.UNKNOWN)
+            // THEN
+            assertThat(review.rating).isEqualTo(0)
+            assertThat(review.voteCount).isEqualTo(0)
+            assertThat(review.sentiment).isEqualTo(Sentiment.UNKNOWN)
+        }
     }
 
     // --- HELPERS ---
