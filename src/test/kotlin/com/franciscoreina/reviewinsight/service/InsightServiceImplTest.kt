@@ -4,6 +4,7 @@ import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
 import com.franciscoreina.reviewinsight.exceptions.AiAnalysisException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
+import com.franciscoreina.reviewinsight.exceptions.ReviewProviderException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
@@ -83,6 +84,32 @@ class InsightServiceImplTest {
                 .isInstanceOf(EmptyReviewsException::class.java)
                 .hasMessage("Reviews cannot be empty for app $appId")
 
+            verify { reviewAnalyzerMock wasNot Called }
+        }
+
+        @Test
+        fun `should throw propagate exception when review provider fails`() {
+            // GIVEN
+            val appId = 12345
+            val country = "gb"
+            val pages = 1
+            val error = "Review Analyzer error"
+            val originalCause = RuntimeException("Connection timeout")
+
+            every { reviewProviderMock.fetchReviews(appId, country, pages) } throws ReviewProviderException(
+                error,
+                originalCause
+            )
+
+            // WHEN-THEN
+            assertThatThrownBy {
+                insightService.generateInsight(appId, country, pages)
+            }
+                .isInstanceOf(ReviewProviderException::class.java)
+                .hasMessage(error)
+                .hasCause(originalCause)
+
+            verify(exactly = 1) { reviewProviderMock.fetchReviews(appId, country, pages) }
             verify { reviewAnalyzerMock wasNot Called }
         }
 
