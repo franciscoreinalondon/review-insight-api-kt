@@ -2,7 +2,7 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
-import com.franciscoreina.reviewinsight.exceptions.AiAnalysisException
+import com.franciscoreina.reviewinsight.exceptions.ReviewAnalyzerException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.exceptions.ReviewProviderException
 import com.franciscoreina.reviewinsight.model.domain.Review
@@ -119,13 +119,13 @@ class InsightServiceImplTest {
             val cause = RuntimeException("Connection timeout")
 
             every { reviewProvider.fetchReviews(appId, country, pages) } returns reviews
-            every { reviewAnalyzer.analyze(reviews) } throws AiAnalysisException(errorMessage, cause)
+            every { reviewAnalyzer.analyze(reviews) } throws ReviewAnalyzerException(errorMessage, cause)
 
             // WHEN-THEN
             assertThatThrownBy {
                 insightService.generateInsight(appId, country, pages)
             }
-                .isInstanceOf(AiAnalysisException::class.java)
+                .isInstanceOf(ReviewAnalyzerException::class.java)
                 .hasMessage(errorMessage)
                 .hasCause(cause)
 
