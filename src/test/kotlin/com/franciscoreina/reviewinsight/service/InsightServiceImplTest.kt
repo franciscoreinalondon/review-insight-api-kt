@@ -2,6 +2,7 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
+import com.franciscoreina.reviewinsight.exceptions.AiAnalysisException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
@@ -84,7 +85,33 @@ class InsightServiceImplTest {
 
             verify { reviewAnalyzerMock wasNot Called }
         }
+
+        @Test
+        fun `should throw propagate exception when review analyzer fails`() {
+            // GIVEN
+            val appId = 12345
+            val country = "gb"
+            val pages = 1
+            val reviews = listOf(createReview())
+            val error = "Review Analyzer error"
+            val originalCause = RuntimeException("Connection timeout")
+
+            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns reviews
+            every { reviewAnalyzerMock.analyze(reviews) } throws AiAnalysisException(error, originalCause)
+
+            // WHEN-THEN
+            assertThatThrownBy {
+                insightService.generateInsight(appId, country, pages)
+            }
+                .isInstanceOf(AiAnalysisException::class.java)
+                .hasMessage(error)
+                .hasCause(originalCause)
+
+            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
+        }
+
     }
+
 
     // --- HELPERS ---
 
