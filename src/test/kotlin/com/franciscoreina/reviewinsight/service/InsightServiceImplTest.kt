@@ -1,10 +1,12 @@
 package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
+import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Insight
 import com.franciscoreina.reviewinsight.model.domain.Problem
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
@@ -13,6 +15,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.OffsetDateTime
 
@@ -49,7 +52,20 @@ class InsightServiceImplTest {
     @DisplayName("Edge Cases and Error Handling")
     inner class EdgeCases {
 
+        @Test
+        fun `should throw exception when reviews is empty`() {
+            // GIVEN
+            val reviews = emptyList<Review>()
 
+            // WHEN
+            val exception = assertThrows<EmptyReviewsException> {
+                insightService.generateInsight(reviews)
+            }
+
+            // THEN
+            assertThat(exception.message).isEqualTo("Reviews cannot be empty")
+            verify { reviewAnalyzerMock wasNot Called }
+        }
 
     }
 
