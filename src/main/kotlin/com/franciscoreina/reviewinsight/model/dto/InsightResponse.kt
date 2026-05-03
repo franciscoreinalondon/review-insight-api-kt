@@ -9,5 +9,5 @@ data class InsightResponse(
     val negative: Int,
     val neutral: Int,
     val reviews: List<Review>,
-    val insights: Insight
+    val insight: Insight
 )
