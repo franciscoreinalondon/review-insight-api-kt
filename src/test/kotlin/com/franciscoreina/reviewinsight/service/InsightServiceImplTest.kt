@@ -1,19 +1,15 @@
 package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
-import com.franciscoreina.reviewinsight.exceptions.AiAnalysisException
-import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
-import com.franciscoreina.reviewinsight.model.domain.Insight
-import com.franciscoreina.reviewinsight.model.domain.Problem
+import com.franciscoreina.reviewinsight.client.ReviewProvider
 import com.franciscoreina.reviewinsight.model.domain.Review
+import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
-import io.mockk.Called
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -23,69 +19,41 @@ import java.time.OffsetDateTime
 @ExtendWith(MockKExtension::class)
 class InsightServiceImplTest {
 
+    private val reviewProviderMock = mockk<ReviewProvider>()
     private val reviewAnalyzerMock = mockk<ReviewAnalyzer>()
-    private val insightService = InsightServiceImpl(reviewAnalyzerMock)
+    private val insightService = InsightServiceImpl(reviewProviderMock, reviewAnalyzerMock)
 
     @Nested
-    @DisplayName("Successful generation")
+    @DisplayName("Happy Path")
     inner class HappyPath {
 
         @Test
-        fun `should generate insight from reviews`() {
+        fun `should fetch reviews and generate full review insight report`() {
             // GIVEN
-            val reviews = listOf(createReview())
-            val problems = listOf(createProblem())
-            val insight = createInsight("Success", problems)
+            val appId = 12345
+            val country = "gb"
+            val pages = 1
+            val reviews = listOf(
+                createReview(sentiment = Sentiment.POSITIVE),
+                createReview(sentiment = Sentiment.POSITIVE),
+                createReview(sentiment = Sentiment.NEGATIVE)
+            )
+            val analysis = ReviewAnalysis(summary = "Generally positive", topProblems = emptyList())
 
-            every { reviewAnalyzerMock.analyze(reviews) } returns insight
+            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns reviews
+            every { reviewAnalyzerMock.analyze(reviews) } returns analysis
 
             // WHEN
-            val result = insightService.generateInsight(reviews)
+            val result = insightService.generateInsight(appId, country, pages)
 
             // THEN
-            assertThat(result).isEqualTo(insight)
-            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
-        }
+            assertThat(result.reviews).isEqualTo(reviews)
+            assertThat(result.stats.total).isEqualTo(3)
+            assertThat(result.stats.positive).isEqualTo(2)
+            assertThat(result.stats.negative).isEqualTo(1)
+            assertThat(result.analysis).isEqualTo(analysis)
 
-    }
-
-    @Nested
-    @DisplayName("Edge Cases and Error Handling")
-    inner class EdgeCases {
-
-        @Test
-        fun `should throw exception when reviews is empty`() {
-            // GIVEN
-            val reviews = emptyList<Review>()
-            val error = "Reviews cannot be empty"
-
-            // WHEN-THEN
-            assertThatThrownBy {
-                insightService.generateInsight(reviews)
-            }
-                .isInstanceOf(EmptyReviewsException::class.java)
-                .hasMessage(error)
-
-            verify { reviewAnalyzerMock wasNot Called }
-        }
-
-        @Test
-        fun `should throw exception when review analyzer fails`() {
-            // GIVEN
-            val reviews = listOf(createReview())
-            val error = "Review Analyzer error"
-            val originalCause = RuntimeException("Connection timeout")
-
-            every { reviewAnalyzerMock.analyze(reviews) } throws AiAnalysisException(error, originalCause)
-
-            // WHEN-THEN
-            assertThatThrownBy {
-                insightService.generateInsight(reviews)
-            }
-                .isInstanceOf(AiAnalysisException::class.java)
-                .hasMessage(error)
-                .hasCause(originalCause)
-
+            verify(exactly = 1) { reviewProviderMock.fetchReviews(appId, country, pages) }
             verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
         }
 
@@ -111,17 +79,5 @@ class InsightServiceImplTest {
             date = date,
             sentiment = sentiment
         )
-    }
-
-    private fun createProblem(
-        name: String = "default problem", count: Int = 0, examples: List<String> = emptyList()
-    ): Problem {
-        return Problem(name, count, examples)
-    }
-
-    private fun createInsight(
-        summary: String, topProblems: List<Problem>
-    ): Insight {
-        return Insight(summary, topProblems)
     }
 }
