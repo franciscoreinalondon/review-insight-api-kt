@@ -1,10 +1,10 @@
 package com.franciscoreina.reviewinsight.model.domain
 
 enum class Sentiment {
+    UNKNOWN,
     POSITIVE,
     NEGATIVE,
-    NEUTRAL,
-    UNKNOWN;
+    NEUTRAL;
 
     companion object {
         fun fromRating(rating: Int?): Sentiment {
