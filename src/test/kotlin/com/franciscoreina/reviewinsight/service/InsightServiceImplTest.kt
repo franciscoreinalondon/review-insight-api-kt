@@ -17,7 +17,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.OffsetDateTime
 
@@ -58,14 +57,15 @@ class InsightServiceImplTest {
         fun `should throw exception when reviews is empty`() {
             // GIVEN
             val reviews = emptyList<Review>()
+            val error = "Reviews cannot be empty"
 
-            // WHEN
-            val exception = assertThrows<EmptyReviewsException> {
+            // WHEN-THEN
+            assertThatThrownBy {
                 insightService.generateInsight(reviews)
             }
+                .isInstanceOf(EmptyReviewsException::class.java)
+                .hasMessage(error)
 
-            // THEN
-            assertThat(exception.message).isEqualTo("Reviews cannot be empty")
             verify { reviewAnalyzerMock wasNot Called }
         }
 
