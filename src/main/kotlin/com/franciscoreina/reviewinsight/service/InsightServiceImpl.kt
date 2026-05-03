@@ -24,6 +24,7 @@ class InsightServiceImpl(
         }
 
         val stats = reviews.calculateStats()
+
         val analysis = reviewAnalyzer.analyze(reviews)
 
         return ReviewInsight(

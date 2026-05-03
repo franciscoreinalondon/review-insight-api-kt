@@ -24,9 +24,13 @@ import java.time.OffsetDateTime
 @ExtendWith(MockKExtension::class)
 class InsightServiceImplTest {
 
-    private val reviewProviderMock = mockk<ReviewProvider>()
-    private val reviewAnalyzerMock = mockk<ReviewAnalyzer>()
-    private val insightService = InsightServiceImpl(reviewProviderMock, reviewAnalyzerMock)
+    private val reviewProvider = mockk<ReviewProvider>()
+    private val reviewAnalyzer = mockk<ReviewAnalyzer>()
+    private val insightService = InsightServiceImpl(reviewProvider, reviewAnalyzer)
+
+    private val appId = 12345
+    private val country = "gb"
+    private val pages = 1
 
     @Nested
     @DisplayName("Happy Path")
@@ -35,9 +39,6 @@ class InsightServiceImplTest {
         @Test
         fun `should fetch reviews and generate full review insight report`() {
             // GIVEN
-            val appId = 12345
-            val country = "gb"
-            val pages = 1
             val reviews = listOf(
                 createReview(sentiment = Sentiment.POSITIVE),
                 createReview(sentiment = Sentiment.POSITIVE),
@@ -45,21 +46,26 @@ class InsightServiceImplTest {
             )
             val analysis = ReviewAnalysis(summary = "Generally positive", topProblems = emptyList())
 
-            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns reviews
-            every { reviewAnalyzerMock.analyze(reviews) } returns analysis
+            every { reviewProvider.fetchReviews(appId, country, pages) } returns reviews
+            every { reviewAnalyzer.analyze(reviews) } returns analysis
 
             // WHEN
             val result = insightService.generateInsight(appId, country, pages)
 
             // THEN
-            assertThat(result.reviews).isEqualTo(reviews)
-            assertThat(result.stats.total).isEqualTo(3)
-            assertThat(result.stats.positive).isEqualTo(2)
-            assertThat(result.stats.negative).isEqualTo(1)
+            assertThat(result.reviews).hasSize(3).isEqualTo(reviews)
+
+            with(result.stats) {
+                assertThat(total).isEqualTo(3)
+                assertThat(positive).isEqualTo(2)
+                assertThat(negative).isEqualTo(1)
+                assertThat(neutral).isEqualTo(0)
+            }
+
             assertThat(result.analysis).isEqualTo(analysis)
 
-            verify(exactly = 1) { reviewProviderMock.fetchReviews(appId, country, pages) }
-            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
+            verify(exactly = 1) { reviewProvider.fetchReviews(appId, country, pages) }
+            verify(exactly = 1) { reviewAnalyzer.analyze(reviews) }
         }
 
     }
@@ -71,11 +77,7 @@ class InsightServiceImplTest {
         @Test
         fun `should throw exception when reviews list is empty`() {
             // GIVEN
-            val appId = 12345
-            val country = "gb"
-            val pages = 1
-
-            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns emptyList()
+            every { reviewProvider.fetchReviews(appId, country, pages) } returns emptyList()
 
             // WHEN-THEN
             assertThatThrownBy {
@@ -84,80 +86,68 @@ class InsightServiceImplTest {
                 .isInstanceOf(EmptyReviewsException::class.java)
                 .hasMessage("Reviews cannot be empty for app $appId")
 
-            verify { reviewAnalyzerMock wasNot Called }
+            verify(exactly = 1) { reviewProvider.fetchReviews(appId, country, pages) }
+            verify { reviewAnalyzer wasNot Called }
         }
 
         @Test
         fun `should throw propagate exception when review provider fails`() {
             // GIVEN
-            val appId = 12345
-            val country = "gb"
-            val pages = 1
-            val error = "Review Analyzer error"
-            val originalCause = RuntimeException("Connection timeout")
+            val errorMessage = "Review Provider Error"
+            val cause = RuntimeException("Connection timeout")
 
-            every { reviewProviderMock.fetchReviews(appId, country, pages) } throws ReviewProviderException(
-                error,
-                originalCause
-            )
+            every { reviewProvider.fetchReviews(appId, country, pages) } throws
+                    ReviewProviderException(errorMessage, cause)
 
             // WHEN-THEN
             assertThatThrownBy {
                 insightService.generateInsight(appId, country, pages)
             }
                 .isInstanceOf(ReviewProviderException::class.java)
-                .hasMessage(error)
-                .hasCause(originalCause)
+                .hasMessage(errorMessage)
+                .hasCause(cause)
 
-            verify(exactly = 1) { reviewProviderMock.fetchReviews(appId, country, pages) }
-            verify { reviewAnalyzerMock wasNot Called }
+            verify(exactly = 1) { reviewProvider.fetchReviews(appId, country, pages) }
+            verify { reviewAnalyzer wasNot Called }
         }
 
         @Test
         fun `should throw propagate exception when review analyzer fails`() {
             // GIVEN
-            val appId = 12345
-            val country = "gb"
-            val pages = 1
             val reviews = listOf(createReview())
-            val error = "Review Analyzer error"
-            val originalCause = RuntimeException("Connection timeout")
+            val errorMessage = "Review Analyzer Error"
+            val cause = RuntimeException("Connection timeout")
 
-            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns reviews
-            every { reviewAnalyzerMock.analyze(reviews) } throws AiAnalysisException(error, originalCause)
+            every { reviewProvider.fetchReviews(appId, country, pages) } returns reviews
+            every { reviewAnalyzer.analyze(reviews) } throws AiAnalysisException(errorMessage, cause)
 
             // WHEN-THEN
             assertThatThrownBy {
                 insightService.generateInsight(appId, country, pages)
             }
                 .isInstanceOf(AiAnalysisException::class.java)
-                .hasMessage(error)
-                .hasCause(originalCause)
+                .hasMessage(errorMessage)
+                .hasCause(cause)
 
-            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
+            verify(exactly = 1) { reviewAnalyzer.analyze(reviews) }
         }
 
     }
-
 
     // --- HELPERS ---
 
     private fun createReview(
         author: String = "author",
         rating: Int = 5,
-        title: String = "title",
-        content: String = "content",
-        voteCount: Int = 0,
-        date: OffsetDateTime = OffsetDateTime.now(),
         sentiment: Sentiment = Sentiment.POSITIVE
     ): Review {
         return Review(
             author = author,
             rating = rating,
-            title = title,
-            content = content,
-            voteCount = voteCount,
-            date = date,
+            title = "title",
+            content = "content",
+            voteCount = 0,
+            date = OffsetDateTime.now(),
             sentiment = sentiment
         )
     }
