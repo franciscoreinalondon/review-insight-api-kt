@@ -1,6 +1,7 @@
 package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
+import com.franciscoreina.reviewinsight.exceptions.AiAnalysisException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Insight
 import com.franciscoreina.reviewinsight.model.domain.Problem
@@ -12,6 +13,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -65,6 +67,26 @@ class InsightServiceImplTest {
             // THEN
             assertThat(exception.message).isEqualTo("Reviews cannot be empty")
             verify { reviewAnalyzerMock wasNot Called }
+        }
+
+        @Test
+        fun `should throw exception when review analyzer fails`() {
+            // GIVEN
+            val reviews = listOf(createReview())
+            val error = "Review Analyzer error"
+            val originalCause = RuntimeException("Connection timeout")
+
+            every { reviewAnalyzerMock.analyze(reviews) } throws AiAnalysisException(error, originalCause)
+
+            // WHEN-THEN
+            assertThatThrownBy {
+                insightService.generateInsight(reviews)
+            }
+                .isInstanceOf(AiAnalysisException::class.java)
+                .hasMessage(error)
+                .hasCause(originalCause)
+
+            verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
         }
 
     }
