@@ -1,13 +1,13 @@
 package com.franciscoreina.reviewinsight.model.dto
 
-import com.franciscoreina.reviewinsight.model.domain.Insight
 import com.franciscoreina.reviewinsight.model.domain.Review
+import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
 
 data class InsightResponse(
-    val totalReviews: Int,
-    val positive: Int,
-    val negative: Int,
-    val neutral: Int,
     val reviews: List<Review>,
-    val insight: Insight
+    val total: Int,
+    val positive: Int,
+    val neutral: Int,
+    val negative: Int,
+    val analysis: ReviewAnalysis
 )
