@@ -2,14 +2,17 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
+import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
 import com.franciscoreina.reviewinsight.model.domain.Sentiment
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -57,6 +60,30 @@ class InsightServiceImplTest {
             verify(exactly = 1) { reviewAnalyzerMock.analyze(reviews) }
         }
 
+    }
+
+    @Nested
+    @DisplayName("Edge Cases and Error Handling")
+    inner class EdgeCases {
+
+        @Test
+        fun `should throw exception when reviews list is empty`() {
+            // GIVEN
+            val appId = 12345
+            val country = "gb"
+            val pages = 1
+
+            every { reviewProviderMock.fetchReviews(appId, country, pages) } returns emptyList()
+
+            // WHEN-THEN
+            assertThatThrownBy {
+                insightService.generateInsight(appId, country, pages)
+            }
+                .isInstanceOf(EmptyReviewsException::class.java)
+                .hasMessage("Reviews cannot be empty for app $appId")
+
+            verify { reviewAnalyzerMock wasNot Called }
+        }
     }
 
     // --- HELPERS ---

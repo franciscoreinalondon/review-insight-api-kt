@@ -2,6 +2,7 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
+import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewInsight
 import com.franciscoreina.reviewinsight.model.domain.ReviewStats
@@ -17,6 +18,11 @@ class InsightServiceImpl(
     override fun generateInsight(appId: Int, country: String, pages: Int): ReviewInsight {
 
         val reviews = reviewProvider.fetchReviews(appId, country, pages)
+
+        if (reviews.isEmpty()) {
+            throw EmptyReviewsException("Reviews cannot be empty for app $appId")
+        }
+
         val stats = reviews.calculateStats()
         val analysis = reviewAnalyzer.analyze(reviews)
 
