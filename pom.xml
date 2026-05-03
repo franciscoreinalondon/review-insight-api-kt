@@ -21,6 +21,7 @@
         <java.version>21</java.version>
         <kotlin.version>2.2.21</kotlin.version>
         <mockk.version>1.14.9</mockk.version>
+        <springmockk.version>5.0.1</springmockk.version>
     </properties>
 
     <dependencies>
@@ -99,6 +100,12 @@
             <groupId>io.mockk</groupId>
             <artifactId>mockk-jvm</artifactId>
             <version>${mockk.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ninja-squad</groupId>
+            <artifactId>springmockk</artifactId>
+            <version>${springmockk.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
