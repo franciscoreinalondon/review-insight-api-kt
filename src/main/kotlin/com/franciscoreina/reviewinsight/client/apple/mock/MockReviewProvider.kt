@@ -17,7 +17,7 @@ import tools.jackson.databind.json.JsonMapper
 class MockReviewProvider(private val jsonMapper: JsonMapper) : ReviewProvider {
 
     override fun fetchReviews(appId: Int, country: String, pages: Int): List<Review> {
-        val jsonStream = ClassPathResource("mocks/apple/monzo-reviews.json").inputStream
+        val jsonStream = ClassPathResource("mocks/apple/zopa-reviews.json").inputStream
         val response = jsonMapper.readValue(jsonStream, AppleRssResponseDTO::class.java)
         return response.feed.entries.map { it.toDomain() }
     }

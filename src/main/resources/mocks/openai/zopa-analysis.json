@@ -1,0 +1,32 @@
+{
+  "summary": "Users frequently encounter technical issues such as app crashes, slow or failed transactions, and login problems. Customer service is widely reported as unresponsive, slow, and ineffective, especially regarding account access and fraud cases. Additionally, many users experience account access problems including frozen accounts, blocked payments, and difficulties receiving SMS codes or updating contact details.",
+  "topProblems": [
+    {
+      "count": 12,
+      "examples": [
+        "App keeps locking up and needs re-download daily",
+        "App often logs me out and requires passcode reset",
+        "App is riddled with bugs causing money to disappear"
+      ],
+      "name": "App and Technical Issues"
+    },
+    {
+      "count": 11,
+      "examples": [
+        "Customer service is non existent, avoid!",
+        "No feedback or callbacks from support",
+        "Customer service just repeats problem like a broken AI"
+      ],
+      "name": "Poor Customer Service"
+    },
+    {
+      "count": 10,
+      "examples": [
+        "Frozen account with no explanation and money inaccessible",
+        "Can't receive SMS code for login due to old number",
+        "Payments are delayed or blocked affecting bills and credit rating"
+      ],
+      "name": "Account Access and Payment Problems"
+    }
+  ]
+}

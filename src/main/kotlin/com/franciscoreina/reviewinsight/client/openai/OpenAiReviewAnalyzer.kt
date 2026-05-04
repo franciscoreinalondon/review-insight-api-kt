@@ -6,10 +6,12 @@ import com.franciscoreina.reviewinsight.client.openai.dto.OpenAiRequestDTO
 import com.franciscoreina.reviewinsight.exceptions.ReviewAnalyzerException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewAnalysis
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
 
 @Component
+@ConditionalOnProperty(name = ["app.mock-mode"], havingValue = "false") // If mock disabled -> enables real API call
 class OpenAiReviewAnalyzer(
     private val openAiClient: OpenAiClient,
     private val jsonMapper: JsonMapper
