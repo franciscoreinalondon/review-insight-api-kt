@@ -33,6 +33,17 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(ReviewAnalyzerException::class)
+    fun handleReviewAnalyzerException(ex: ReviewAnalyzerException): ResponseEntity<ApiErrorResponse> {
+        logger.error { "External dependency failed: ${ex.message}" }
+
+        return buildErrorResponse(
+            HttpStatus.BAD_GATEWAY,
+            code = "REVIEW_ANALYZER_ERROR",
+            message = ex.message ?: "Review analyzer error"
+        )
+    }
+
     private fun buildErrorResponse(
         status: HttpStatus,
         code: String,
