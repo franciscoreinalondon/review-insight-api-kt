@@ -22,6 +22,7 @@
         <kotlin.version>2.2.21</kotlin.version>
         <mockk.version>1.14.9</mockk.version>
         <springmockk.version>5.0.1</springmockk.version>
+        <kotlin-logging.version>8.0.01</kotlin-logging.version>
     </properties>
 
     <dependencies>
@@ -68,6 +69,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Logs -->
+        <dependency>
+            <groupId>io.github.oshai</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
+            <version>${kotlin-logging.version}</version>
         </dependency>
 
         <!-- Test -->
