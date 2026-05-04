@@ -15,7 +15,7 @@ class AppleRssResponseJsonTest @Autowired constructor(
     @Test
     fun `should parse full apple rss json correctly`() {
         // GIVEN
-        val jsonPath = ClassPathResource("mocks/apple/monzo-reviews.json")
+        val jsonPath = ClassPathResource("mocks/apple/zopa-reviews.json")
 
         // WHEN
         val result = json.read(jsonPath).getObject()
@@ -24,11 +24,11 @@ class AppleRssResponseJsonTest @Autowired constructor(
         assertThat(result.feed.entries).isNotEmpty
 
         val review = result.feed.entries.first()
-        assertThat(review.author.name.label).isEqualTo("Catr65")
+        assertThat(review.author.name.label).isEqualTo("Simon Theaker")
         assertThat(review.rating.label).isEqualTo("5")
-        assertThat(review.title.label).isEqualTo("Stress Free Borrowing")
-        assertThat(review.content.label).startsWith("I have had a number")
+        assertThat(review.title.label).isEqualTo("Fantastic credit card")
+        assertThat(review.content.label).startsWith("Great credit builder credit card")
         assertThat(review.voteCount.label).isEqualTo("0")
-        assertThat(review.updated.label).isEqualTo("2026-04-28T11:52:49-07:00")
+        assertThat(review.updated.label).isEqualTo("2026-03-03T08:03:35-07:00")
     }
 }
