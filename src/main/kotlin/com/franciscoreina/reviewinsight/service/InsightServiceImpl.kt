@@ -2,6 +2,7 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
+import com.franciscoreina.reviewinsight.exceptions.EmptyProblemsException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.Review
 import com.franciscoreina.reviewinsight.model.domain.ReviewInsight
@@ -26,6 +27,9 @@ class InsightServiceImpl(
         val stats = reviews.calculateStats()
 
         val analysis = reviewAnalyzer.analyze(reviews)
+        if (analysis.topProblems.isEmpty()) {
+            throw EmptyProblemsException("Problems cannot be empty after analysis")
+        }
 
         return ReviewInsight(
             reviews,
