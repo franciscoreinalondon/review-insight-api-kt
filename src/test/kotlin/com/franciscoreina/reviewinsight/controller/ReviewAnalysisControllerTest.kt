@@ -30,10 +30,6 @@ class ReviewAnalysisControllerTest @Autowired constructor(
     @MockkBean
     private lateinit var insightService: InsightService
 
-    private val appId = 12345
-    private val country = "gb"
-    private val pages = 1
-
     @Nested
     @DisplayName("POST /v1/insight")
     inner class GenerateReviewAnalysis {
@@ -41,13 +37,19 @@ class ReviewAnalysisControllerTest @Autowired constructor(
         @Test
         fun `should return 200 OK and valid insight response`() {
             // GIVEN
-            val request = createInsightRequest(appId)
+            val request = createInsightRequest()
             val reviewInsight = createReviewInsight(
                 reviews = listOf(createReview(sentiment = Sentiment.POSITIVE)),
                 stats = ReviewStats(total = 1, positive = 1, neutral = 0, negative = 0)
             )
 
-            every { insightService.generateInsight(appId, country, pages) } returns reviewInsight
+            every {
+                insightService.generateInsight(
+                    request.appId,
+                    request.country,
+                    request.pages
+                )
+            } returns reviewInsight
 
             // WHEN-THEN
             mockMvc.perform(
@@ -65,7 +67,7 @@ class ReviewAnalysisControllerTest @Autowired constructor(
                 )
                 .andExpect(jsonPath("$.analysis.topProblems").isArray)
 
-            verify(exactly = 1) { insightService.generateInsight(appId, country, pages) }
+            verify(exactly = 1) { insightService.generateInsight(request.appId, request.country, request.pages) }
         }
 
         @Test
@@ -89,6 +91,8 @@ class ReviewAnalysisControllerTest @Autowired constructor(
                 .andExpect(jsonPath("$.code").value("REVIEWS_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value(errorMessage))
                 .andExpect(jsonPath("$.timestamp").exists())
+
+            verify(exactly = 1) { insightService.generateInsight(request.appId, request.country, request.pages) }
         }
 
         @Test
