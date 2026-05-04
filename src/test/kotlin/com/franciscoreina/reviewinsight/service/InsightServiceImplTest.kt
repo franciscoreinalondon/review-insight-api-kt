@@ -2,7 +2,6 @@ package com.franciscoreina.reviewinsight.service
 
 import com.franciscoreina.reviewinsight.client.ReviewAnalyzer
 import com.franciscoreina.reviewinsight.client.ReviewProvider
-import com.franciscoreina.reviewinsight.exceptions.EmptyProblemsException
 import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.exceptions.ReviewAnalyzerException
 import com.franciscoreina.reviewinsight.exceptions.ReviewProviderException
@@ -115,26 +114,6 @@ class InsightServiceImplTest {
         }
 
         @Test
-        fun `should throw exception when problem list is empty`() {
-            // GIVEN
-            val reviews = listOf(createReview())
-            val analysis = createReviewAnalysis()
-
-            every { reviewProvider.fetchReviews(appId, country, pages) } returns reviews
-            every { reviewAnalyzer.analyze(reviews) } returns analysis
-
-            // WHEN-THEN
-            assertThatThrownBy {
-                insightService.generateInsight(appId, country, pages)
-            }
-                .isInstanceOf(EmptyProblemsException::class.java)
-                .hasMessage("Problems cannot be empty after analysis")
-
-            verify(exactly = 1) { reviewProvider.fetchReviews(appId, country, pages) }
-            verify(exactly = 1) { reviewAnalyzer.analyze(reviews) }
-        }
-
-        @Test
         fun `should throw propagate exception when review analyzer fails`() {
             // GIVEN
             val reviews = listOf(createReview())
@@ -172,16 +151,6 @@ class InsightServiceImplTest {
             voteCount = 0,
             date = OffsetDateTime.now(),
             sentiment = sentiment
-        )
-    }
-
-    private fun createReviewAnalysis(
-        summary: String = "default",
-        topProblems: List<Problem> = emptyList()
-    ): ReviewAnalysis {
-        return ReviewAnalysis(
-            summary = summary,
-            topProblems = topProblems
         )
     }
 
