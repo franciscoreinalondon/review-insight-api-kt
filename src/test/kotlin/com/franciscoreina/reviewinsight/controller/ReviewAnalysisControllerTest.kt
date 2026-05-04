@@ -86,7 +86,7 @@ class ReviewAnalysisControllerTest @Autowired constructor(
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.code").value("REVIEWS_NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value(errorMessage))
-                .andExpect(jsonPath("$.timeStamp").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
         }
 
     }

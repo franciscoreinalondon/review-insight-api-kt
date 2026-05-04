@@ -6,5 +6,5 @@ data class ApiErrorResponse(
     val status: Int,
     val code: String,
     val message: String,
-    val timeStamp: Instant = Instant.now()
+    val timestamp: Instant = Instant.now()
 )
