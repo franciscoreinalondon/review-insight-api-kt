@@ -1,5 +1,6 @@
 package com.franciscoreina.reviewinsight.client.apple.config
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
@@ -19,6 +20,15 @@ class WebClientConfig {
                     JacksonJsonDecoder(jsonMapper, MediaType.parseMediaType("text/javascript"))
                 )
             }
+            .build()
+    }
+
+    @Bean
+    fun openAiWebClient(@Value("\${openai.api-key}") apiKey: String): WebClient {
+        return WebClient.builder()
+            .baseUrl("https://api.openai.com")
+            .defaultHeader("Authorization", "Bearer $apiKey")
+            .defaultHeader("Content-Type", "application/json")
             .build()
     }
 
