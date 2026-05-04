@@ -83,7 +83,7 @@ class OpenAiReviewAnalyzer(
                 .path("content")
                 .get(0)
                 .path("text")
-                .asText()
+                .asString()
 
             jsonMapper.readValue(jsonText, ReviewAnalysis::class.java)
         } catch (ex: Exception) {
