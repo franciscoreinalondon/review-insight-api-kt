@@ -36,8 +36,8 @@ class InsightServiceImpl(
 
     private fun List<Review>.calculateStats() = ReviewStats(
         total = this.size,
-        positive = this.count() { it.sentiment == Sentiment.POSITIVE },
-        neutral = this.count() { it.sentiment == Sentiment.NEUTRAL },
-        negative = this.count() { it.sentiment == Sentiment.NEGATIVE }
+        positive = this.count { it.sentiment == Sentiment.POSITIVE },
+        neutral = this.count { it.sentiment == Sentiment.NEUTRAL },
+        negative = this.count { it.sentiment == Sentiment.NEGATIVE }
     )
 }
