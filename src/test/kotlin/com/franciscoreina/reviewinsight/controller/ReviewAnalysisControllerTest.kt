@@ -1,5 +1,6 @@
 package com.franciscoreina.reviewinsight.controller
 
+import com.franciscoreina.reviewinsight.exceptions.EmptyReviewsException
 import com.franciscoreina.reviewinsight.model.domain.*
 import com.franciscoreina.reviewinsight.model.dto.InsightRequest
 import com.franciscoreina.reviewinsight.service.InsightService
@@ -33,7 +34,7 @@ class ReviewAnalysisControllerTest @Autowired constructor(
     private val pages = 1
 
     @Nested
-    @DisplayName("POST /v1/insights")
+    @DisplayName("POST /v1/insight")
     inner class GenerateReviewAnalysis {
 
         @Test
@@ -64,6 +65,28 @@ class ReviewAnalysisControllerTest @Autowired constructor(
                 .andExpect(jsonPath("$.analysis.topProblems").isArray)
 
             verify(exactly = 1) { insightService.generateInsight(appId, country, pages) }
+        }
+
+        @Test
+        fun `should return 404 Not Found when reviews list is empty`() {
+            // GIVEN
+            val request = createInsightRequest()
+            val errorMessage = "Reviews cannot be empty"
+
+            every {
+                insightService.generateInsight(request.appId, request.country, request.pages)
+            } throws EmptyReviewsException(errorMessage)
+
+            // WHEN-THEN
+            mockMvc.perform(post("/v1/insight")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+            )
+                .andExpect(status().isNotFound)
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.code").value("REVIEWS_NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value(errorMessage))
+                .andExpect(jsonPath("$.timeStamp").exists())
         }
 
     }
