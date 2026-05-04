@@ -4,9 +4,11 @@ import com.franciscoreina.reviewinsight.client.ReviewProvider
 import com.franciscoreina.reviewinsight.client.apple.dto.AppleReviewDTO
 import com.franciscoreina.reviewinsight.client.apple.mapper.toDomain
 import com.franciscoreina.reviewinsight.model.domain.Review
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(name = ["app.mock-mode"], havingValue = "false") // If mock disabled -> enables real API call
 class AppleReviewProvider(
     private val rssClient: AppleRssClient,
 ) : ReviewProvider {
