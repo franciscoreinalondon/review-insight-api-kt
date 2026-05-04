@@ -1,4 +1,4 @@
-package com.franciscoreina.reviewinsight.client.apple.config
+package com.franciscoreina.reviewinsight.client.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
